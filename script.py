@@ -1,5 +1,5 @@
-from itertools import combinations
 import cupy as np
+
 
 def one_hot_encoding(word):
     word_vec = np.zeros(26)
@@ -10,6 +10,7 @@ def one_hot_encoding(word):
 
     return word_vec
 
+
 def one_hot_decoding(word_vec):
     decoded_word = []
     for i, val in enumerate(word_vec):
@@ -17,15 +18,33 @@ def one_hot_decoding(word_vec):
             decoded_word.append(chr(i + ord('a')))
     return decoded_word
 
+
+def choose(t, k):
+    if k == 0:
+        return [[]]
+    if not t:
+        return []
+    
+    head = t[0]
+    tail = t[1:]
+
+    combos_with_head = [[head] + combo for combo in choose(tail, k-1)]
+    combos_without_head = choose(tail, k)
+
+    return combos_with_head + combos_without_head
+
+#
 with open('words.txt') as fin:
     words = [line.strip() for line in fin]
 words_matrix = np.array([one_hot_encoding(word) for word in words])
 del words # for memory save
 
+#
 combos = list(combinations('abcdefghijklmnopqrstuvwxyz', 5))
 combos_matrix = np.array([one_hot_encoding(combo) for combo in combos]).T
 del combos # for memory save
 
+#
 batch_size = 1000
 max_iter_num = int(combos_matrix.shape[1]/batch_size)
 best_combo = None
